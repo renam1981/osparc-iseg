@@ -17,6 +17,8 @@
 #include <Q3VBoxLayout>
 #include <QCloseEvent>
 #include <QPaintEvent>
+#include <q3action.h>
+#include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qbuttongroup.h>
 #include <qcolor.h>
@@ -558,7 +560,7 @@ int SliceViewerWidget::get_slicenr() { return qsb_slicenr->value() - 1; }
 
 void SliceViewerWidget::bmp_changed()
 {
-	if (rb_bmp->isChecked())
+	if (rb_bmp->isOn())
 	{
 		unsigned short nrslicesnew;
 		if (directionx)
@@ -583,7 +585,7 @@ void SliceViewerWidget::bmp_changed()
 
 void SliceViewerWidget::work_changed()
 {
-	if (rb_work->isChecked())
+	if (rb_work->isOn())
 	{
 		unsigned short nrslicesnew;
 		if (directionx)
@@ -615,7 +617,7 @@ void SliceViewerWidget::tissuevisible_changed()
 
 void SliceViewerWidget::workorbmp_changed()
 {
-	if (rb_bmp->isChecked())
+	if (rb_bmp->isOn())
 	{
 		shower->set_bmporwork(true);
 	}

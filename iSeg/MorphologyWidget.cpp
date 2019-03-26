@@ -139,15 +139,15 @@ void MorphologyWidget::execute()
 		dataSelection.allSlices = true;
 		emit begin_datachange(dataSelection, this);
 
-		if (rb_open->isChecked())
+		if (rb_open->isOn())
 		{
 			handler3D->open(radius, true3d);
 		}
-		else if (rb_close->isChecked())
+		else if (rb_close->isOn())
 		{
 			handler3D->closure(radius, true3d);
 		}
-		else if (rb_erode->isChecked())
+		else if (rb_erode->isOn())
 		{
 			handler3D->erosion(radius, true3d);
 		}
@@ -163,15 +163,15 @@ void MorphologyWidget::execute()
 		dataSelection.sliceNr = handler3D->active_slice();
 		emit begin_datachange(dataSelection, this);
 
-		if (rb_open->isChecked())
+		if (rb_open->isOn())
 		{
 			bmphand->open(radius, connect8);
 		}
-		else if (rb_close->isChecked())
+		else if (rb_close->isOn())
 		{
 			bmphand->closure(radius, connect8);
 		}
-		else if (rb_erode->isChecked())
+		else if (rb_erode->isOn())
 		{
 			bmphand->erosion(radius, connect8);
 		}
@@ -220,19 +220,19 @@ FILE* MorphologyWidget::SaveParams(FILE* fp, int version)
 		int dummy;
 		dummy = static_cast<int>(radius);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(connect8); // rb_8connect->isChecked());
+		dummy = (int)(connect8); // rb_8connect->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(!connect8); // rb_4connect->isChecked());
+		dummy = (int)(!connect8); // rb_4connect->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_open->isChecked());
+		dummy = (int)(rb_open->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_close->isChecked());
+		dummy = (int)(rb_close->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_erode->isChecked());
+		dummy = (int)(rb_erode->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_dilate->isChecked());
+		dummy = (int)(rb_dilate->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(all_slices->isChecked());
+		dummy = (int)(all_slices->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 

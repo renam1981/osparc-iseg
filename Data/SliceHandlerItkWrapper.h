@@ -15,16 +15,16 @@
 
 namespace iseg {
 
-class ISEG_DATA_API SlicesHandlerITKInterface
+class ISEG_DATA_API SliceHandlerItkWrapper
 {
 public:
-	using pixel_type = SlicesHandlerInterface::pixel_type;
-	using tissue_type = SlicesHandlerInterface::tissue_type;
+	using pixel_type = SliceHandlerInterface::pixel_type;
+	using tissue_type = SliceHandlerInterface::tissue_type;
 
 	using image_ref_type = itk::SliceContiguousImage<pixel_type>;
 	using tissues_ref_type = itk::SliceContiguousImage<tissue_type>;
 
-	SlicesHandlerITKInterface(SlicesHandlerInterface* sh) : _handler(sh) {}
+	SliceHandlerItkWrapper(SliceHandlerInterface* sh) : _handler(sh) {}
 
 	itk::SliceContiguousImage<pixel_type>::Pointer GetSource(bool active_slices);
 	itk::SliceContiguousImage<pixel_type>::Pointer GetSource(size_t start_slice, size_t end_slice);
@@ -50,7 +50,7 @@ public:
 	itk::Image<tissue_type, 3>::Pointer GetTissuesDeprecated(bool active_slices);
 
 private:
-	SlicesHandlerInterface* _handler;
+	SliceHandlerInterface* _handler;
 };
 
 } // namespace iseg

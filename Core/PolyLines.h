@@ -36,6 +36,8 @@ void PolylinesToEdges(const std::vector<std::vector<Index>>& polylines, std::vec
 template<typename Index, typename Tuple>
 void RemoveDuplicateEdges(std::vector<Tuple>& edges);
 
+template<typename TVec3>
+void WritePolylinesToVtk(std::vector<std::vector<TVec3>>& polylines, const std::string& file_name);
 } // namespace iseg
 
 #include "PolyLines.inl"

@@ -28,7 +28,7 @@ namespace iseg {
 
 namespace {
 
-class TestHandler : public SlicesHandlerInterface
+class TestHandler : public SliceHandlerInterface
 {
 	unsigned short _dims[3];
 	unsigned short _start;

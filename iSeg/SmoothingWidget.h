@@ -15,6 +15,7 @@
 
 #include "Interface/WidgetInterface.h"
 
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -79,16 +80,15 @@ private:
 	QSpinBox* sb_iter;
 	QSpinBox* sb_kmax;
 	//	QSpinBox *sb_restrainmax;
-	QCheckBox* allslices;
+	QPushButton* pushexec;
+	QPushButton* contdiff;
 	QRadioButton* rb_gaussian;
 	QRadioButton* rb_average;
 	QRadioButton* rb_median;
 	QRadioButton* rb_sigmafilter;
 	QRadioButton* rb_anisodiff;
 	QButtonGroup* modegroup;
-	QPushButton* pushexec;
-	QPushButton* contdiff;
-	
+	QCheckBox* allslices;
 	bool dontundo;
 
 private slots:

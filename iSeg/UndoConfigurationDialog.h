@@ -7,14 +7,19 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#pragma once
+#ifndef UNDOCONFIG_23NOV05
+#define UNDOCONFIG_23NOV05
 
 #include "SlicesHandler.h"
 
-#include <qdialog.h>
+#include <q3hbox.h>
+#include <q3vbox.h>
 #include <qcheckbox.h>
+#include <qdialog.h>
+#include <qlabel.h>
 #include <qpushbutton.h>
 #include <qspinbox.h>
+#include <qwidget.h>
 
 namespace iseg {
 
@@ -29,6 +34,13 @@ public:
 private:
 	SlicesHandler* handler3D;
 	QCheckBox* cb_undo3D;
+	Q3VBox* vbox1;
+	Q3VBox* vbox2;
+	Q3VBox* vbox3;
+	Q3HBox* hbox1;
+	//	QHBox *hbox2;
+	QLabel* lb_nrundo;
+	QLabel* lb_nrundoarrays;
 	QSpinBox* sb_nrundo;
 	QSpinBox* sb_nrundoarrays;
 	QPushButton* pb_close;
@@ -39,3 +51,4 @@ private slots:
 
 } // namespace iseg
 
+#endif

@@ -15,7 +15,7 @@
 
 class QButtonGroup;
 class QRadioButton;
-class QStackedWidget;
+class QStackedLayout;
 
 namespace iseg {
 
@@ -76,7 +76,7 @@ private:
 	QRadioButton* smooth_tissues;
 
 	ParamViewBase* current_params = nullptr;
-	QStackedWidget* stacked_params;
+	QStackedLayout* stacked_param_layout;
 	OLCorrParamView* olc_params;
 	BrushParamView* brush_params;
 	FillHolesParamView* fill_holes_params;

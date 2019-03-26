@@ -14,6 +14,9 @@
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
 
+#include <q3hbox.h>
+#include <q3listbox.h>
+#include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qcolor.h>

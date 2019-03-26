@@ -15,14 +15,29 @@
 
 #include "Data/addLine.h"
 
-#include "Interface/LayoutTools.h"
-
 #include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"
 
-#include <QTime>
-#include <QFormLayout>
+#include <q3listbox.h>
+#include <q3vbox.h>
+#include <qbuttongroup.h>
+#include <qcheckbox.h>
+#include <qdialog.h>
+#include <qimage.h>
+#include <qinputdialog.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpainter.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
+using namespace std;
 using namespace iseg;
 
 LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent,
@@ -35,12 +50,18 @@ LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent,
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
+	hboxoverall = new Q3HBox(this);
+	hboxoverall->setMargin(8);
+	vboxmethods = new Q3VBox(hboxoverall);
+	vbox1 = new Q3VBox(hboxoverall);
+
 	drawing = false;
 	lw = lwfirst = nullptr;
 
-	// parameters
-	straight = new QRadioButton(QString("Straight"));
-	autotrace = new QRadioButton(QString("Auto Trace"));
+	drawmode = new QButtonGroup(this);
+
+	straight = new QRadioButton(QString("Straight"), vboxmethods);
+	autotrace = new QRadioButton(QString("Auto Trace"), vboxmethods);
 	autotrace->setToolTip(Format(
 			"The Livewire (intelligent scissors) algorithm "
 			"to automatically identify the ideal contour path.This algorithm uses "
@@ -60,66 +81,68 @@ LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent,
 			"mouse button. A double left click closes the contour while a double "
 			"middle "
 			"click aborts the line drawing process."));
-	freedraw = new QRadioButton(QString("Free"));
-	auto drawmode = make_button_group(this, {straight, autotrace, freedraw});
-	autotrace->setChecked(true);
+	freedraw = new QRadioButton(QString("Free"), vboxmethods);
+	drawmode->insert(straight);
+	drawmode->insert(autotrace);
+	drawmode->insert(freedraw);
+	autotrace->setChecked(TRUE);
 
-	cb_freezing = new QCheckBox;
-	cb_freezing->setToolTip(Format(
-			"Specify the number of seconds after which a line segment is "
-			"frozen even without mouse click if it has not changed."));
-	sb_freezing = new QSpinBox(1, 10, 1, nullptr);
+	hbox2 = new Q3HBox(vbox1);
+	cb_freezing = new QCheckBox("Freezing", hbox2);
+	cb_freezing->setToolTip(
+			Format("Specify the number of seconds after which a line segment is "
+						 "frozen even without mouse click if it has not changed."));
+	lb_freezing1 = new QLabel("Delay: ", hbox2);
+	sb_freezing = new QSpinBox(1, 10, 1, hbox2);
 	sb_freezing->setValue(3);
+	lb_freezing2 = new QLabel("seconds", hbox2);
 
-	cb_closing = new QCheckBox;
+	hbox3 = new Q3HBox(vbox1);
+	cb_closing = new QCheckBox("Close Contour", hbox3);
 	cb_closing->setChecked(true);
 
-	// layout
-	auto method_layout = make_vbox({straight, autotrace, freedraw});
-	auto method_area = new QFrame;
-	method_area->setLayout(method_layout);
-	method_area->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	method_area->setLineWidth(1);
-	method_area->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+	vboxmethods->setMargin(5);
+	vbox1->setMargin(5);
+	vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 
-	params_layout = new QFormLayout;
-	params_layout->addRow("Close contour", cb_closing);
-	params_layout->addRow("Freezing", cb_freezing);
-	params_layout->addRow("Freezing delay (s)", sb_freezing);
-
-	auto top_layout = new QHBoxLayout;
-	top_layout->addWidget(method_area);
-	top_layout->addLayout(params_layout);
-
-	setLayout(top_layout);
-
-	// initialize
 	cooling = false;
 	cb_freezing->setChecked(cooling);
+
+	hbox2->setFixedSize(hbox2->sizeHint() + QSize(100, 0));
+	hbox3->setFixedSize(hbox3->sizeHint() + QSize(100, 0));
+	vbox1->setFixedSize(vbox1->sizeHint() + QSize(50, 0));
 
 	sbfreezing_changed(sb_freezing->value());
 	freezing_changed();
 	mode_changed();
 
-	// connections
-	connect(drawmode, SIGNAL(buttonClicked(int)), this, SLOT(mode_changed()));
-	connect(cb_freezing, SIGNAL(clicked()), this, SLOT(freezing_changed()));
-	connect(sb_freezing, SIGNAL(valueChanged(int)), this, SLOT(sbfreezing_changed(int)));
+	QObject::connect(drawmode, SIGNAL(buttonClicked(int)), this,
+			SLOT(mode_changed()));
+	QObject::connect(cb_freezing, SIGNAL(clicked()), this,
+			SLOT(freezing_changed()));
+	QObject::connect(sb_freezing, SIGNAL(valueChanged(int)), this,
+			SLOT(sbfreezing_changed(int)));
+
+	return;
 }
 
 LivewireWidget::~LivewireWidget()
 {
+	delete vbox1;
+	delete drawmode;
 	if (lw != nullptr)
 		delete lw;
 	if (lwfirst != nullptr)
 		delete lwfirst;
 }
 
+QSize LivewireWidget::sizeHint() const { return hboxoverall->sizeHint(); }
+
 void LivewireWidget::on_mouse_clicked(Point p)
 {
 	if (!drawing)
 	{
-		if (autotrace->isChecked())
+		if (autotrace->isOn())
 		{
 			if (lw == nullptr)
 			{
@@ -148,7 +171,7 @@ void LivewireWidget::on_mouse_clicked(Point p)
 	}
 	else
 	{
-		if (straight->isChecked())
+		if (straight->isOn())
 		{
 			addLine(&established, p1, p);
 			dynamic.clear();
@@ -181,15 +204,15 @@ void LivewireWidget::on_mouse_clicked(Point p)
 
 void LivewireWidget::pt_doubleclicked(Point p)
 {
-	if (drawing && !freedraw->isChecked())
+	if (drawing && !freedraw->isOn())
 	{
 		clicks.push_back(p);
-		if (straight->isChecked())
+		if (straight->isOn())
 		{
 			addLine(&established, p1, p);
 			addLine(&established, p2, p);
 		}
-		else if (autotrace->isChecked())
+		else if (autotrace->isOn())
 		{
 			lw->return_path(p, &dynamic);
 			established.insert(established.end(), dynamic.begin(),
@@ -235,7 +258,7 @@ void LivewireWidget::pt_midclicked(Point p)
 		}
 		else
 		{
-			if (straight->isChecked())
+			if (straight->isOn())
 			{
 				established.clear();
 				dynamic.clear();
@@ -243,7 +266,7 @@ void LivewireWidget::pt_midclicked(Point p)
 				establishedlengths.pop_back();
 				p1 = clicks.back();
 				addLine(&dynamic, p1, p);
-				auto it = clicks.begin();
+				vector<Point>::iterator it = clicks.begin();
 				Point pp = p2;
 				it++;
 				while (it != clicks.end())
@@ -256,12 +279,12 @@ void LivewireWidget::pt_midclicked(Point p)
 					addLine(&dynamic, p2, p);
 				emit vp1dyn_changed(&established, &dynamic);
 			}
-			else if (autotrace->isChecked())
+			else if (autotrace->isOn())
 			{
 				dynamic.clear();
 				clicks.pop_back();
 				establishedlengths.pop_back();
-				auto it1 = established.begin();
+				vector<Point>::iterator it1 = established.begin();
 				for (int i = 0; i < establishedlengths.back(); i++)
 					it1++;
 				established.erase(it1, established.end());
@@ -272,7 +295,7 @@ void LivewireWidget::pt_midclicked(Point p)
 				{
 					times.resize(dynamic.size());
 					QTime now = QTime::currentTime();
-					auto tit = times.begin();
+					vector<QTime>::iterator tit = times.begin();
 					while (tit != times.end())
 					{
 						*tit = now;
@@ -291,6 +314,7 @@ void LivewireWidget::pt_midclicked(Point p)
 
 void LivewireWidget::pt_doubleclickedmid(Point p)
 {
+	UNREFERENCED_PARAMETER(p);
 	if (drawing)
 	{
 		dynamic.clear();
@@ -312,7 +336,7 @@ void LivewireWidget::pt_doubleclickedmid(Point p)
 
 void LivewireWidget::on_mouse_released(Point p)
 {
-	if (freedraw->isChecked() && drawing)
+	if (freedraw->isOn() && drawing)
 	{
 		clicks.push_back(p);
 		addLine(&dynamic, p1, p);
@@ -343,7 +367,7 @@ void LivewireWidget::on_mouse_moved(Point p)
 {
 	if (drawing)
 	{
-		if (freedraw->isChecked())
+		if (freedraw->isOn())
 		{
 			dynamic1.clear();
 			addLine(&dynamic, p1, p);
@@ -353,7 +377,7 @@ void LivewireWidget::on_mouse_moved(Point p)
 			p1 = p;
 			clicks.push_back(p);
 		}
-		else if (straight->isChecked())
+		else if (straight->isOn())
 		{
 			dynamic.clear();
 			addLine(&dynamic, p1, p);
@@ -369,11 +393,11 @@ void LivewireWidget::on_mouse_moved(Point p)
 
 			if (cooling)
 			{
-				std::vector<Point>::reverse_iterator rit, ritold;
+				vector<Point>::reverse_iterator rit, ritold;
 				rit = dynamic.rbegin();
 				ritold = dynamicold.rbegin();
 				times.resize(dynamic.size());
-				auto tit = times.begin();
+				vector<QTime>::iterator tit = times.begin();
 				while (rit != dynamic.rend() && ritold != dynamicold.rend() &&
 							 (*rit).px == (*ritold).px && (*rit).py == (*ritold).py)
 				{
@@ -589,19 +613,41 @@ void LivewireWidget::bmphand_changed(bmphandler* bmph)
 
 void LivewireWidget::mode_changed()
 {
-	cb_freezing->setEnabled(autotrace->isChecked());
-	params_layout->labelForField(cb_freezing)->setEnabled(autotrace->isChecked());
-	freezing_changed();
+	if (autotrace->isOn())
+	{
+		hbox2->show();
+	}
+	else
+	{
+		hbox2->hide();
+	}
 
-	cb_closing->setEnabled(!freedraw->isChecked());
-	params_layout->labelForField(cb_closing)->setEnabled(cb_closing->isEnabled());
+	if (freedraw->isOn())
+	{
+		hbox3->hide();
+	}
+	else
+	{
+		hbox3->show();
+	}
 }
 
 void LivewireWidget::freezing_changed()
 {
-	cooling = cb_freezing->isChecked();
-	sb_freezing->setEnabled(cooling && autotrace->isChecked());
-	params_layout->labelForField(sb_freezing)->setEnabled(sb_freezing->isEnabled());
+	if (cb_freezing->isChecked())
+	{
+		cooling = true;
+		sb_freezing->show();
+		lb_freezing1->show();
+		lb_freezing2->show();
+	}
+	else
+	{
+		cooling = false;
+		sb_freezing->hide();
+		lb_freezing1->hide();
+		lb_freezing2->hide();
+	}
 }
 
 void LivewireWidget::sbfreezing_changed(int i)
@@ -617,15 +663,15 @@ FILE* LivewireWidget::SaveParams(FILE* fp, int version)
 		int dummy;
 		dummy = sb_freezing->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)autotrace->isChecked();
+		dummy = (int)autotrace->isOn();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)straight->isChecked();
+		dummy = (int)straight->isOn();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)freedraw->isChecked();
+		dummy = (int)freedraw->isOn();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(cb_freezing->isChecked());
+		dummy = (int)(cb_freezing->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(cb_closing->isChecked());
+		dummy = (int)(cb_closing->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -636,9 +682,12 @@ FILE* LivewireWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		//disconnect(drawmode, SIGNAL(buttonClicked(int)), this, SLOT(mode_changed()));
-		disconnect(cb_freezing, SIGNAL(clicked()), this, SLOT(freezing_changed()));
-		disconnect(sb_freezing, SIGNAL(valueChanged(int)), this, SLOT(sbfreezing_changed(int)));
+		QObject::disconnect(drawmode, SIGNAL(buttonClicked(int)), this,
+				SLOT(mode_changed()));
+		QObject::disconnect(cb_freezing, SIGNAL(clicked()), this,
+				SLOT(freezing_changed()));
+		QObject::disconnect(sb_freezing, SIGNAL(valueChanged(int)), this,
+				SLOT(sbfreezing_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -658,9 +707,12 @@ FILE* LivewireWidget::LoadParams(FILE* fp, int version)
 		freezing_changed();
 		mode_changed();
 
-		//connect(drawmode, SIGNAL(buttonClicked(int)), this, SLOT(mode_changed()));
-		connect(cb_freezing, SIGNAL(clicked()), this, SLOT(freezing_changed()));
-		connect(sb_freezing, SIGNAL(valueChanged(int)), this, SLOT(sbfreezing_changed(int)));
+		QObject::connect(drawmode, SIGNAL(buttonClicked(int)), this,
+				SLOT(mode_changed()));
+		QObject::connect(cb_freezing, SIGNAL(clicked()), this,
+				SLOT(freezing_changed()));
+		QObject::connect(sb_freezing, SIGNAL(valueChanged(int)), this,
+				SLOT(sbfreezing_changed(int)));
 	}
 	return fp;
 }
@@ -668,6 +720,6 @@ FILE* LivewireWidget::LoadParams(FILE* fp, int version)
 void LivewireWidget::hideparams_changed()
 {
 	mode_changed();
-	//if (hideparams && !cb_freezing->isChecked())
-	//	hbox2->hide();
+	if (hideparams && !cb_freezing->isChecked())
+		hbox2->hide();
 }

@@ -178,7 +178,7 @@ LoaderDicom::~LoaderDicom()
 
 void LoaderDicom::subsect_toggled()
 {
-	if (cb_subsect->isChecked())
+	if (cb_subsect->isOn())
 	{
 		hbox2->show();
 	}
@@ -192,7 +192,7 @@ void LoaderDicom::subsect_toggled()
 
 void LoaderDicom::ct_toggled()
 {
-	if (cb_ct->isChecked())
+	if (cb_ct->isOn())
 	{
 		vbox6->show();
 	}
@@ -226,7 +226,7 @@ void LoaderDicom::load_pushed()
 				vnames.push_back((*it).ascii());
 		}
 
-		if (cb_subsect->isChecked())
+		if (cb_subsect->isOn())
 		{
 			Point p;
 			p.px = xoffset->value();
@@ -245,23 +245,23 @@ void LoaderDicom::load_pushed()
 				handler3D->LoadDICOM(vnames);
 		}
 
-		if (cb_ct->isChecked())
+		if (cb_ct->isOn())
 		{
 			Pair p;
-			if (rb_muscle->isChecked())
+			if (rb_muscle->isOn())
 			{
 				//				handler3D->get_range(&p);
 				p.high = 1190;
 				p.low = 890;
 			}
-			else if (rb_bone->isChecked())
+			else if (rb_bone->isOn())
 			{
 				handler3D->get_range(&p);
 				//				p.high=;
 				//				p.low=;
 			}
 			handler3D->scale_colors(p);
-			if (cb_crop->isChecked())
+			if (cb_crop->isOn())
 			{
 				handler3D->crop_colors();
 			}
@@ -425,7 +425,7 @@ int LoaderRaw::getBits() const
 
 void LoaderRaw::subsect_toggled()
 {
-	bool isset = subsect->isChecked();
+	bool isset = subsect->isOn();
 	;
 	if (isset)
 	{
@@ -446,7 +446,7 @@ void LoaderRaw::subsect_toggled()
 void LoaderRaw::load_pushed()
 {
 	unsigned bitdepth;
-	if (bit8->isChecked())
+	if (bit8->isOn())
 		bitdepth = 8;
 	else
 		bitdepth = 16;
@@ -592,8 +592,8 @@ SaverImg::~SaverImg()
 
 void SaverImg::type_changed(int)
 {
-	if (typevti->isChecked() || typevtk->isChecked() || typemat->isChecked() ||
-			typenii->isChecked())
+	if (typevti->isOn() || typevtk->isOn() || typemat->isOn() ||
+			typenii->isOn())
 	{
 		all1->setChecked(TRUE);
 		vbox5->setEnabled(false);
@@ -611,11 +611,11 @@ void SaverImg::save_pushed()
 	{
 		boost::filesystem::path file_path(nameEdit->text().ascii());
 
-		if (typebmp->isChecked())
+		if (typebmp->isOn())
 		{
-			if (pictbmp->isChecked())
+			if (pictbmp->isOn())
 			{
-				if (all1->isChecked())
+				if (all1->isOn())
 				{
 					res = handler3D->SaveBmpBitmap(nameEdit->text().ascii());
 				}
@@ -628,9 +628,9 @@ void SaverImg::save_pushed()
 										 s.ascii()) == 0);
 				}
 			}
-			else if (pictwork->isChecked())
+			else if (pictwork->isOn())
 			{
-				if (all1->isChecked())
+				if (all1->isOn())
 				{
 					res = handler3D->SaveWorkBitmap(nameEdit->text().ascii());
 				}
@@ -644,9 +644,9 @@ void SaverImg::save_pushed()
 										 s.ascii()) == 0);
 				}
 			}
-			else if (picttissue->isChecked())
+			else if (picttissue->isOn())
 			{
-				if (all1->isChecked())
+				if (all1->isOn())
 				{
 					res = handler3D->SaveTissueBitmap(nameEdit->text().ascii());
 				}
@@ -662,48 +662,48 @@ void SaverImg::save_pushed()
 				}
 			}
 		}
-		else if (typevtk->isChecked() || typevti->isChecked() || typenii->isChecked())
+		else if (typevtk->isOn() || typevti->isOn() || typenii->isOn())
 		{
 			if (!file_path.has_extension())
 			{
-				file_path.append(typevtk->isChecked()
+				file_path.append(typevtk->isOn()
 														 ? ".vtk"
-														 : (typevti->isChecked() ? ".vti" : ".nii"));
+														 : (typevti->isOn() ? ".vti" : ".nii"));
 			}
 
 			bool binary = true;
-			if (pictbmp->isChecked())
+			if (pictbmp->isOn())
 			{
 				res = handler3D->export_bmp(file_path.string().c_str(), binary);
 			}
-			else if (picttissue->isChecked())
+			else if (picttissue->isOn())
 			{
 				res = handler3D->export_tissue(file_path.string().c_str(),
 						binary);
 			}
-			else if (pictwork->isChecked())
+			else if (pictwork->isOn())
 			{
 				res =
 						handler3D->export_work(file_path.string().c_str(), binary);
 			}
 		}
-		else if (typemat->isChecked())
+		else if (typemat->isOn())
 		{
-			if (pictbmp->isChecked())
+			if (pictbmp->isOn())
 			{
 				QString s = nameEdit->text();
 				if (s.length() > 4 && !s.endsWith(QString(".mat")))
 					s.append(".mat");
 				res = handler3D->print_bmpmat(s.ascii());
 			}
-			else if (pictwork->isChecked())
+			else if (pictwork->isOn())
 			{
 				QString s = nameEdit->text();
 				if (s.length() > 4 && !s.endsWith(QString(".mat")))
 					s.append(".mat");
 				res = handler3D->print_workmat(s.ascii());
 			}
-			else if (picttissue->isChecked())
+			else if (picttissue->isOn())
 			{
 				QString s = nameEdit->text();
 				if (s.length() > 4 && !s.endsWith(QString(".mat")))
@@ -711,11 +711,11 @@ void SaverImg::save_pushed()
 				res = handler3D->print_tissuemat(s.ascii());
 			}
 		}
-		else if (typeraw->isChecked())
+		else if (typeraw->isOn())
 		{
-			if (pictbmp->isChecked())
+			if (pictbmp->isOn())
 			{
-				if (all1->isChecked())
+				if (all1->isOn())
 				{
 					res =
 							(handler3D->SaveBmpRaw(nameEdit->text().ascii()) == 0);
@@ -726,9 +726,9 @@ void SaverImg::save_pushed()
 										 nameEdit->text().ascii()) == 0);
 				}
 			}
-			else if (pictwork->isChecked())
+			else if (pictwork->isOn())
 			{
-				if (all1->isChecked())
+				if (all1->isOn())
 				{
 					res =
 							(handler3D->SaveWorkRaw(nameEdit->text().ascii()) == 0);
@@ -739,9 +739,9 @@ void SaverImg::save_pushed()
 										 nameEdit->text().ascii()) == 0);
 				}
 			}
-			else if (picttissue->isChecked())
+			else if (picttissue->isOn())
 			{
-				if (all1->isChecked())
+				if (all1->isOn())
 				{
 					res = (handler3D->SaveTissueRaw(nameEdit->text().ascii()) ==
 								 0);
@@ -883,7 +883,7 @@ ReloaderRaw::~ReloaderRaw()
 
 void ReloaderRaw::subsect_toggled()
 {
-	bool isset = subsect->isChecked();
+	bool isset = subsect->isOn();
 	;
 	if (isset)
 	{
@@ -904,14 +904,14 @@ void ReloaderRaw::subsect_toggled()
 void ReloaderRaw::load_pushed()
 {
 	unsigned bitdepth;
-	if (bit8->isChecked())
+	if (bit8->isOn())
 		bitdepth = 8;
 	else
 		bitdepth = 16;
 
 	if (!(nameEdit->text()).isEmpty())
 	{
-		if (subsect->isChecked())
+		if (subsect->isOn())
 		{
 			Point p;
 			p.px = xoffset->value();
@@ -1192,7 +1192,7 @@ void LoaderColorImages::load_mixer()
 		handler3D->set_rgb_factors(33, 33, 33);
 	}
 
-	if (subsect->isChecked())
+	if (subsect->isOn())
 	{
 		Point p;
 		p.px = xoffset->value();
@@ -1811,7 +1811,7 @@ ReloaderBmp2::~ReloaderBmp2() { delete vbox1; }
 
 void ReloaderBmp2::subsect_toggled()
 {
-	bool isset = subsect->isChecked();
+	bool isset = subsect->isOn();
 	;
 	if (isset)
 	{
@@ -1833,7 +1833,7 @@ void ReloaderBmp2::subsect_toggled()
 
 void ReloaderBmp2::load_pushed()
 {
-	if (subsect->isChecked())
+	if (subsect->isOn())
 	{
 		Point p;
 		p.px = xoffset->value();

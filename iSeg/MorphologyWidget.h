@@ -7,7 +7,8 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#pragma once
+#ifndef MORPHO_4MARCH05
+#define MORPHO_4MARCH05
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
@@ -65,3 +66,4 @@ private slots:
 
 } // namespace iseg
 
+#endif

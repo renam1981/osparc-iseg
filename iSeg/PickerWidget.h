@@ -7,15 +7,27 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#pragma once
+#ifndef PICKERWIDGET_15DEZ08
+#define PICKERWIDGET_15DEZ08
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
 #include "Interface/WidgetInterface.h"
 
+#include <q3mimefactory.h>
+#include <q3vbox.h>
+#include <qbuttongroup.h>
+#include <qcombobox.h>
+#include <qevent.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
+#include <qwidget.h>
+
+#include <algorithm>
 
 namespace iseg {
 
@@ -28,6 +40,7 @@ public:
 	~PickerWidget();
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
+	QSize sizeHint() const override;
 	void init() override;
 	void cleanup() override;
 	void newloaded() override;
@@ -53,16 +66,20 @@ private:
 	bool* currentselection;
 	float* valuedistrib;
 	unsigned char mode;
-
+	Q3HBox* hbox1;
+	Q3HBox* hbox2;
+	Q3HBox* hbox3;
+	Q3VBox* vbox1;
 	QPushButton* pb_copy;
 	QPushButton* pb_paste;
 	QPushButton* pb_cut;
 	QPushButton* pb_delete;
 	QRadioButton* rb_work;
 	QRadioButton* rb_tissue;
+	QButtonGroup* worktissuegroup;
 	QRadioButton* rb_erase;
 	QRadioButton* rb_fill;
-
+	QButtonGroup* erasefillgroup;
 	std::vector<Point> selection;
 
 signals:
@@ -84,3 +101,4 @@ protected:
 
 } // namespace iseg
 
+#endif

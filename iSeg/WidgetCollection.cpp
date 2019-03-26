@@ -436,7 +436,7 @@ ShowHisto::~ShowHisto()
 
 void ShowHisto::subsect_toggled()
 {
-	bool isset = subsect->isChecked();
+	bool isset = subsect->isOn();
 	if (isset)
 	{
 		vbox2->show();
@@ -466,10 +466,10 @@ void ShowHisto::subsect_update()
 void ShowHisto::draw_histo()
 {
 	//Point p;
-	if (bmppict->isChecked())
+	if (bmppict->isOn())
 	{
 		bmphand->swap_bmpwork();
-		if (subsect->isChecked())
+		if (subsect->isOn())
 		{
 			Point p;
 			p.px = xoffset->value();
@@ -490,7 +490,7 @@ void ShowHisto::draw_histo()
 	}
 	else
 	{
-		if (subsect->isChecked())
+		if (subsect->isOn())
 		{
 			Point p;
 			p.px = xoffset->value();
@@ -1821,7 +1821,7 @@ void extoverlay_widget::remove_dataset(unsigned short idx)
 void extoverlay_widget::reload_overlay()
 {
 	bool ok = true;
-	if (selectedDataset == 0 && (srcCheckBox->isChecked() || tgtCheckBox->isChecked()))
+	if (selectedDataset == 0 && (srcCheckBox->isOn() || tgtCheckBox->isOn()))
 	{
 		handler3D->clear_overlay();
 	}
@@ -1929,13 +1929,13 @@ void extoverlay_widget::slider_changed(int newval)
 
 void extoverlay_widget::source_toggled()
 {
-	bool isset = srcCheckBox->isChecked();
+	bool isset = srcCheckBox->isOn();
 	emit bmpoverlayvisible_changed(isset);
 }
 
 void extoverlay_widget::target_toggled()
 {
-	bool isset = tgtCheckBox->isChecked();
+	bool isset = tgtCheckBox->isOn();
 	emit workoverlayvisible_changed(isset);
 }
 
@@ -2203,7 +2203,7 @@ ImageMath::~ImageMath() { delete vbox1; }
 
 void ImageMath::imgorval_changed(int)
 {
-	if (rb_val->isChecked())
+	if (rb_val->isOn())
 	{
 		hbox2->show();
 	}
@@ -2226,7 +2226,7 @@ void ImageMath::add_pushed()
 
 	if (allslices->isChecked())
 	{
-		if (rb_val->isChecked())
+		if (rb_val->isOn())
 		{
 			handler3D->bmp_add(val);
 		}
@@ -2237,7 +2237,7 @@ void ImageMath::add_pushed()
 	}
 	else
 	{
-		if (rb_val->isChecked())
+		if (rb_val->isOn())
 		{
 			bmphand->bmp_add(val);
 		}
@@ -2263,7 +2263,7 @@ void ImageMath::sub_pushed()
 
 	if (allslices->isChecked())
 	{
-		if (rb_val->isChecked())
+		if (rb_val->isOn())
 		{
 			handler3D->bmp_add(-val);
 		}
@@ -2274,7 +2274,7 @@ void ImageMath::sub_pushed()
 	}
 	else
 	{
-		if (rb_val->isChecked())
+		if (rb_val->isOn())
 		{
 			bmphand->bmp_add(-val);
 		}
@@ -2300,7 +2300,7 @@ void ImageMath::mult_pushed()
 
 	if (allslices->isChecked())
 	{
-		if (rb_val->isChecked())
+		if (rb_val->isOn())
 		{
 			handler3D->bmp_mult(val);
 		}
@@ -2311,7 +2311,7 @@ void ImageMath::mult_pushed()
 	}
 	else
 	{
-		if (rb_val->isChecked())
+		if (rb_val->isOn())
 		{
 			bmphand->bmp_mult(val);
 		}

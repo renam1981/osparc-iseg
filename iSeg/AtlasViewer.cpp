@@ -16,6 +16,7 @@
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
+#include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qcolor.h>
 #include <qevent.h>

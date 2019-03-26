@@ -17,12 +17,27 @@
 
 #include "Core/ImageForestingTransform.h"
 
+#include <q3listbox.h>
+#include <q3mimefactory.h>
+#include <q3vbox.h>
+#include <qbuttongroup.h>
 #include <qcheckbox.h>
+#include <qdatetime.h>
+#include <qdialog.h>
+#include <qimage.h>
+#include <qinputdialog.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpainter.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
+#include <qslider.h>
 #include <qspinbox.h>
+#include <qwidget.h>
 
-class QFormLayout;
+#include <algorithm>
 
 namespace iseg {
 
@@ -39,6 +54,7 @@ public:
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
 	void hideparams_changed() override;
+	QSize sizeHint() const override;
 	std::string GetName() override { return std::string("Contour"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("contour.png"))); }
 
@@ -68,18 +84,22 @@ private:
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned short activeslice;
-
-	QRadioButton* autotrace;
-	QRadioButton* straight;
-	QRadioButton* freedraw;
-
-	QFormLayout* params_layout;
+	Q3HBox* hboxoverall;
+	Q3VBox* vboxmethods;
+	Q3VBox* vbox1;
+	Q3HBox* hbox2;
+	Q3HBox* hbox3;
 	QCheckBox* cb_freezing;
 	QCheckBox* cb_closing;
 	QSpinBox* sb_freezing;
+	QLabel* lb_freezing1;
+	QLabel* lb_freezing2;
 	QPushButton* pushexec;
-
 	bool straightmode;
+	QRadioButton* autotrace;
+	QRadioButton* straight;
+	QRadioButton* freedraw;
+	QButtonGroup* drawmode;
 	Point p1, p2;
 	std::vector<int> establishedlengths;
 

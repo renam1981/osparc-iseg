@@ -10,13 +10,24 @@
 #include "Precompiled.h"
 
 #include "ImageForestingTransformRegionGrowingWidget.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
 
 #include "Data/addLine.h"
 
 #include "Core/ImageForestingTransform.h"
 
-#include <QFormLayout>
+#include <q3hbox.h>
+#include <q3vbox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
+#include <qslider.h>
+#include <qwidget.h>
 
+#include <algorithm>
+
+using namespace std;
 using namespace iseg;
 
 ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D, QWidget* parent,
@@ -43,12 +54,12 @@ ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowing
 	bmphand = handler3D->get_activebmphandler();
 
 	area = 0;
-	IFTrg = nullptr;
-	lbmap = nullptr;
-	thresh = 0;
 
-	pushclear = new QPushButton("Clear Lines");
-	pushremove = new QPushButton("Remove Line");
+	vbox1 = new Q3VBox(this);
+	vbox1->setMargin(8);
+
+	pushclear = new QPushButton("Clear Lines", vbox1);
+	pushremove = new QPushButton("Remove Line", vbox1);
 	pushremove->setToggleButton(true);
 	pushremove->setToolTip(Format(
 			"Remove Line followed by a click on a line deletes "
@@ -57,32 +68,39 @@ ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowing
 			"been pressed accidentally, a second press will deactivate the "
 			"function again."));
 
-	sl_thresh = new QSlider(Qt::Horizontal, nullptr);
+	hbox1 = new Q3HBox(vbox1);
+
+	sl_thresh = new QSlider(Qt::Horizontal, vbox1);
 	sl_thresh->setRange(0, 100);
 	sl_thresh->setValue(60);
 	sl_thresh->setEnabled(false);
 	sl_thresh->setFixedWidth(400);
 
-	// layout
-	auto layout = new QFormLayout;
-	layout->addRow(pushremove, pushclear);
-	layout->addRow(sl_thresh);
+	hbox1->setFixedSize(hbox1->sizeHint());
+	vbox1->setFixedSize(vbox1->sizeHint());
 
-	setLayout(layout);
+	IFTrg = nullptr;
+	lbmap = nullptr;
+	thresh = 0;
 
-	// connections
-	connect(pushclear, SIGNAL(clicked()), this, SLOT(clearmarks()));
-	connect(sl_thresh, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed(int)));
-	connect(sl_thresh, SIGNAL(sliderPressed()), this, SLOT(slider_pressed()));
-	connect(sl_thresh, SIGNAL(sliderReleased()), this, SLOT(slider_released()));
+	QObject::connect(pushclear, SIGNAL(clicked()), this, SLOT(clearmarks()));
+	QObject::connect(sl_thresh, SIGNAL(sliderMoved(int)), this,
+			SLOT(slider_changed(int)));
+	QObject::connect(sl_thresh, SIGNAL(sliderPressed()), this,
+			SLOT(slider_pressed()));
+	QObject::connect(sl_thresh, SIGNAL(sliderReleased()), this,
+			SLOT(slider_released()));
 }
 
 ImageForestingTransformRegionGrowingWidget::~ImageForestingTransformRegionGrowingWidget()
 {
+	delete vbox1;
+
 	if (IFTrg != nullptr)
 		delete IFTrg;
 	if (lbmap != nullptr)
 		delete lbmap;
+	return;
 }
 
 void ImageForestingTransformRegionGrowingWidget::init()
@@ -113,9 +131,10 @@ void ImageForestingTransformRegionGrowingWidget::newloaded()
 
 void ImageForestingTransformRegionGrowingWidget::init1()
 {
-	std::vector<std::vector<Mark>>* vvm = bmphand->return_vvm();
+	vector<vector<Mark>>* vvm = bmphand->return_vvm();
 	vm.clear();
-	for (auto it = vvm->begin(); it != vvm->end(); it++)
+	for (vector<vector<Mark>>::iterator it = vvm->begin(); it != vvm->end();
+			 it++)
 	{
 		vm.insert(vm.end(), it->begin(), it->end());
 	}
@@ -127,11 +146,11 @@ void ImageForestingTransformRegionGrowingWidget::init1()
 	for (unsigned i = 0; i < area; i++)
 		lbmap[i] = 0;
 	unsigned width = (unsigned)bmphand->return_width();
-	for (auto it = vm.begin(); it != vm.end(); it++)
+	for (vector<Mark>::iterator it = vm.begin(); it != vm.end(); it++)
 	{
 		lbmap[width * it->p.py + it->p.px] = (float)it->mark;
 	}
-	for (auto it = vmdyn.begin(); it != vmdyn.end(); it++)
+	for (vector<Point>::iterator it = vmdyn.begin(); it != vmdyn.end(); it++)
 	{
 		lbmap[width * it->py + it->px] = (float)tissuenr;
 	}
@@ -162,13 +181,15 @@ void ImageForestingTransformRegionGrowingWidget::cleanup()
 
 void ImageForestingTransformRegionGrowingWidget::on_tissuenr_changed(int i)
 {
+	// \todo B
+	std::cerr << "ImageForestingTransformRegionGrowingWidget: tissuenr = " << i << std::endl;
 	tissuenr = (unsigned)i + 1;
 }
 
 void ImageForestingTransformRegionGrowingWidget::on_mouse_clicked(Point p)
 {
 	last_pt = p;
-	if (pushremove->isChecked())
+	if (pushremove->isOn())
 	{
 		removemarks(p);
 	}
@@ -176,7 +197,7 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_clicked(Point p)
 
 void ImageForestingTransformRegionGrowingWidget::on_mouse_moved(Point p)
 {
-	if (!pushremove->isChecked())
+	if (!pushremove->isOn())
 	{
 		addLine(&vmdyn, last_pt, p);
 		last_pt = p;
@@ -186,15 +207,15 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_moved(Point p)
 
 void ImageForestingTransformRegionGrowingWidget::on_mouse_released(Point p)
 {
-	if (!pushremove->isChecked())
+	if (!pushremove->isOn())
 	{
 		addLine(&vmdyn, last_pt, p);
 		Mark m;
 		m.mark = tissuenr;
 		unsigned width = (unsigned)bmphand->return_width();
-		std::vector<Mark> vmdummy;
+		vector<Mark> vmdummy;
 		vmdummy.clear();
-		for (auto it = vmdyn.begin(); it != vmdyn.end();
+		for (vector<Point>::iterator it = vmdyn.begin(); it != vmdyn.end();
 				 it++)
 		{
 			m.p = *it;
@@ -220,7 +241,7 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_released(Point p)
 	}
 	else
 	{
-		pushremove->setChecked(false);
+		pushremove->setOn(false);
 	}
 }
 
@@ -300,7 +321,7 @@ void ImageForestingTransformRegionGrowingWidget::bmphand_changed(bmphandler* bmp
 
 	unsigned width = (unsigned)bmphand->return_width();
 
-	std::vector<std::vector<Mark>>* vvm = bmphand->return_vvm();
+	vector<vector<Mark>>* vvm = bmphand->return_vvm();
 	vm.clear();
 	for (auto& line : *vvm)
 	{
@@ -326,6 +347,8 @@ void ImageForestingTransformRegionGrowingWidget::bmphand_changed(bmphandler* bmp
 	}
 
 	emit vm_changed(&vm);
+
+	return;
 }
 
 void ImageForestingTransformRegionGrowingWidget::getrange()
@@ -343,8 +366,12 @@ void ImageForestingTransformRegionGrowingWidget::getrange()
 		thresh = maxthresh;
 	if (maxthresh == 0)
 		maxthresh = thresh = 1;
-	sl_thresh->setValue(std::min(int(thresh * 100 / maxthresh), 100));
+	sl_thresh->setValue(min(int(thresh * 100 / maxthresh), 100));
+
+	return;
 }
+
+QSize ImageForestingTransformRegionGrowingWidget::sizeHint() const { return vbox1->sizeHint(); }
 
 void ImageForestingTransformRegionGrowingWidget::removemarks(Point p)
 {
@@ -356,17 +383,19 @@ void ImageForestingTransformRegionGrowingWidget::removemarks(Point p)
 		dataSelection.vvm = true;
 		emit begin_datachange(dataSelection, this);
 
-		std::vector<std::vector<Mark>>* vvm = bmphand->return_vvm();
+		vector<vector<Mark>>* vvm = bmphand->return_vvm();
 		vm.clear();
-		for (auto it = vvm->begin(); it != vvm->end(); it++)
+		for (vector<vector<Mark>>::iterator it = vvm->begin(); it != vvm->end();
+				 it++)
 		{
 			vm.insert(vm.end(), it->begin(), it->end());
+			;
 		}
 
 		unsigned width = (unsigned)bmphand->return_width();
 		for (unsigned i = 0; i < area; i++)
 			lbmap[i] = 0;
-		for (auto it = vm.begin(); it != vm.end(); it++)
+		for (vector<Mark>::iterator it = vm.begin(); it != vm.end(); it++)
 		{
 			lbmap[width * it->p.py + it->p.px] = (float)it->mark;
 		}

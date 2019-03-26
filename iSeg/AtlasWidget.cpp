@@ -18,8 +18,8 @@
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
-#include <QScrollBar>
 #include <algorithm>
+#include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qcolor.h>
 #include <qevent.h>
@@ -291,17 +291,17 @@ void AtlasWidget::sl_transp_changed()
 void AtlasWidget::xyz_changed()
 {
 	scb_slicenr->setValue(0);
-	if (rb_x->isChecked())
+	if (rb_x->isOn())
 	{
 		scb_slicenr->setMaxValue(dimx - 1);
 		atlasViewer->orient_changed(0);
 	}
-	else if (rb_y->isChecked())
+	else if (rb_y->isOn())
 	{
 		scb_slicenr->setMaxValue(dimy - 1);
 		atlasViewer->orient_changed(1);
 	}
-	else if (rb_z->isChecked())
+	else if (rb_z->isOn())
 	{
 		scb_slicenr->setMaxValue(dimz - 1);
 		atlasViewer->orient_changed(2);

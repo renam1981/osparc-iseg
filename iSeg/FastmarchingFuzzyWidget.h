@@ -11,12 +11,21 @@
 
 #include "Interface/WidgetInterface.h"
 
+#include <q3hbox.h>
+#include <q3mimefactory.h>
+#include <q3vbox.h>
+#include <qbuttongroup.h>
+#include <qdialog.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
+#include <qwidget.h>
 
-class QStackedLayout;
+#include <algorithm>
 
 namespace iseg {
 
@@ -35,6 +44,7 @@ public:
 	void init() override;
 	void newloaded() override;
 	void cleanup() override;
+	QSize sizeHint() const override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
 	void hideparams_changed() override;
@@ -54,23 +64,40 @@ private:
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned short activeslice;
-
-	QStackedLayout* params_stack_layout;
+	Q3HBox* hboxoverall;
+	Q3VBox* vboxmethods;
+	Q3HBox* hbox1;
+	Q3HBox* hbox2;
+	Q3HBox* hbox3;
+	Q3HBox* hbox4;
+	Q3HBox* hbox5;
+	Q3HBox* hbox7;
+	Q3VBox* vbox1;
+	Q3VBox* vboxfast;
+	Q3VBox* vboxfuzzy;
+	QLabel* txt_sigma;
+	QLabel* txt_thresh;
+	QLabel* txt_m1;
+	QLabel* txt_s1;
+	QLabel* txt_s2;
+	QLabel* txt_extend;
 	QSlider* sl_sigma;
 	QSlider* sl_thresh;
-	QSpinBox* sb_thresh;
 	QSlider* sl_m1;
-	QSpinBox* sb_m1;
 	QSlider* sl_s1;
-	QSpinBox* sb_s1;
 	QSlider* sl_s2;
-	QSpinBox* sb_s2;
 	QSlider* sl_extend;
+	QSpinBox* sb_thresh;
+	QSpinBox* sb_m1;
+	QSpinBox* sb_s1;
+	QSpinBox* sb_s2;
+	//	QPushButton *pushexec;
 	QRadioButton* rb_fastmarch;
 	QRadioButton* rb_fuzzy;
 	QRadioButton* rb_drag;
 	QRadioButton* rb_slider;
-
+	QButtonGroup* bg_method;
+	QButtonGroup* bg_interact;
 	void getrange();
 	float sigma, thresh, m1, s1, s2;
 	float sigmamax;
